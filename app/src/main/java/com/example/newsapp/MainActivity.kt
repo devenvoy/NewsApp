@@ -1,8 +1,10 @@
 package com.example.newsapp
 
 import android.app.Dialog
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +26,7 @@ import com.example.newsapp.adapters.MyRecViewAdapter
 import com.example.newsapp.databinding.ActivityMainBinding
 import com.example.newsapp.models.Article
 import com.example.newsapp.models.NewsResponseData
+import com.littlemango.stacklayoutmanager.StackLayoutManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,6 +35,7 @@ import retrofit2.Response
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
     private var responseData: NewsResponseData? = null
     private val articles = mutableListOf<Article>()
     lateinit var dialog: Dialog
@@ -42,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var applyButton: Button
 
     lateinit var newsListAdapter: MyRecViewAdapter
+
     lateinit var cadapter: ArrayAdapter<String>
     lateinit var ladapter: ArrayAdapter<String>
 
@@ -79,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             settingDialog.apply {
                 setContentView(R.layout.activity_settings)
                 window!!.setLayout(MATCH_PARENT, WRAP_CONTENT)
-//                setCancelable(false)
+                setCancelable(false)
                 show()
             }
 
@@ -131,16 +136,19 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        val stackLayoutManager =
+            StackLayoutManager(StackLayoutManager.ScrollOrientation.BOTTOM_TO_TOP)
+        stackLayoutManager.setPagerMode(true)
+        stackLayoutManager.setPagerFlingVelocity(3000)
+        binding.recyclerView.layoutManager = stackLayoutManager
         binding.recyclerView.adapter = newsListAdapter
         getNewsData()
 
     }
 
     private fun getNewsData() {
-        articles.clear()
         showProgress()
-
+        Log.e("====", "getNewsData: hello")
         RetrofitInstance.services.getNewsHeadLines(
             country = countryMap[selectedCountry],
             category = selectedCategory,
@@ -154,12 +162,11 @@ class MainActivity : AppCompatActivity() {
                     if (response.body() != null) {
                         responseData = response.body()!!
                     }
+                    articles.clear()
                     articles.addAll(responseData!!.articles)
                     newsListAdapter.setData(articles)
                     hideProgress()
-                    newsListAdapter.notifyDataSetChanged()
                 }
-
                 override fun onFailure(call: Call<NewsResponseData?>, t: Throwable) {
                     Toast.makeText(this@MainActivity, "Error Occured", Toast.LENGTH_SHORT).show()
                 }
@@ -175,10 +182,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     fun hideProgress() {
         dialog.dismiss()
     }
-
 
 }

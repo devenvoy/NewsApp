@@ -63,6 +63,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
 //
 //    // StackLayout Manager Carousel
-//    implementation("com.littlemango:stacklayoutmanager:1.0.5")
+    implementation("com.littlemango:stacklayoutmanager:1.0.5")
 
 }
